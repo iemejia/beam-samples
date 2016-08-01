@@ -17,16 +17,26 @@
  */
 package org.apache.beam.samples;
 
+import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.io.jms.JmsIO;
+import org.apache.beam.sdk.io.jms.JmsRecord;
+import org.apache.beam.sdk.io.kafka.KafkaIO;
 import org.apache.beam.sdk.options.*;
 import org.apache.beam.sdk.transforms.*;
+import org.apache.beam.sdk.transforms.windowing.IntervalWindow;
+import org.apache.beam.sdk.transforms.windowing.Window;
 import org.apache.beam.sdk.values.KV;
+import org.apache.beam.sdk.values.PCollection;
+import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.jms.ConnectionFactory;
 
 public class EventsByLocation {
 
@@ -68,9 +78,35 @@ public class EventsByLocation {
         }
         LOG.info(options.toString());
 
+        String BROKER_URL = "tcp://localhost:61616";
+        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(BROKER_URL);
+
         Pipeline pipeline = Pipeline.create(options);
-        pipeline
-                .apply("GDELTFile", TextIO.Read.from(options.getInput()))
+
+//        PCollection<String> input =
+//        pipeline
+//                .apply("GDELTFile", TextIO.Read.from(options.getInput()));
+
+        PCollection<JmsRecord> gdeltJmsCol = pipeline.apply(
+                JmsIO.read()
+                    .withConnectionFactory(connectionFactory)
+                    .withQueue("gdelt")
+//                    .withMaxNumRecords(3)
+                    .withMaxNumRecords(Long.MAX_VALUE)
+        );
+
+        PCollection<String> input = gdeltJmsCol.apply("ExtractPayload", ParDo.of(new DoFn<JmsRecord, String>() {
+            @Override
+            public void processElement(ProcessContext c) throws Exception {
+                JmsRecord jmsRecord = c.element();
+                System.out.println(jmsRecord.getPayload());
+                c.output(jmsRecord.getPayload());
+            }
+        }));
+
+//        input.apply("gdelt",
+//                        JmsIO.write().withConnectionFactory(connectionFactory).withQueue("gdelt"));
+        input
                 .apply("ExtractLocation", ParDo.of(new DoFn<String, String>() {
                     public void processElement(ProcessContext c) {
                         String[] fields = c.element().split("\\t+");
@@ -99,14 +135,19 @@ public class EventsByLocation {
                         return true;
                     }
                 }))
+//                .apply("CountPerLocation", Count.<String>perElement())
+        Window.into(new IntervalWindow(Instant.now(), Instant.now().plus(1000)));
+        Window.into()
                 .apply("CountPerLocation", Count.<String>perElement())
+
                 .apply("StringFormat", MapElements.via(new SimpleFunction<KV<String, Long>, String>() {
                     public String apply(KV<String, Long> input) {
                         return input.getKey() + ": " + input.getValue();
                     }
                 }))
                 .apply("Results", TextIO.Write.to(options.getOutput()));
-
+//                .apply("Results",
+//                        JmsIO.write().withConnectionFactory(connectionFactory).withQueue("output"));
         pipeline.run();
     }
 
