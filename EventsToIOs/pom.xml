@@ -65,6 +65,28 @@
 
         <dependency>
             <groupId>org.apache.beam</groupId>
+            <artifactId>beam-sdks-java-io-cassandra</artifactId>
+        </dependency>
+
+        <!-- Used for Cassandra annotations on Cassandra Object Mapper use. -->
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-core</artifactId>
+            <version>3.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-mapping</artifactId>
+            <version>3.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>20.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-io-hbase</artifactId>
         </dependency>
 
@@ -110,13 +132,6 @@
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-io-mongodb</artifactId>
         </dependency>
-
-
-
-        <!--<dependency>
-            <groupId>org.apache.beam</groupId>
-            <artifactId>beam-sdks-java-io-cassandra</artifactId>
-        </dependency>-->
 
         <!-- Test -->
         <dependency>

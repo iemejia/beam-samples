@@ -19,6 +19,10 @@ package org.apache.beam.samples.ingest.amazon;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.io.aws.options.S3Options;
@@ -67,11 +71,21 @@ public class IngestToS3 {
 
   public static void main(String[] args) {
     Options options = PipelineOptionsFactory.fromArgs(args).withValidation().as(Options.class);
+//    options.setAwsRegion("us-east-1");
+
+//    String ak = "XXXXXXXXXXXXXXX";
+//    String sk = "ZXZZZZZZZZZZZZZZZZ";
+//    AWSStaticCredentialsProvider cred = new AWSStaticCredentialsProvider(new BasicAWSCredentials(ak, sk));
+//    options.setAwsCredentialsProvider(cred);
+
     if (options.getInput() == null) {
       options.setInput(Options.GDELT_EVENTS_URL + options.getDate() + ".export.csv");
     }
+
+    options.setInput("/home/ismael/temp/avro-deps.txt");
+    options.setOutput("s3://talend-apache-beam-sse-c");
+
     LOG.info(options.toString());
-    System.out.println(options.toString());
 
     Pipeline pipeline = Pipeline.create(options);
     pipeline

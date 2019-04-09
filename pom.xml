@@ -41,6 +41,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+        <!--<beam.version>2.10.0</beam.version>-->
         <beam.version>2.11.0-SNAPSHOT</beam.version>
         <guava.version>20.0</guava.version>
 
@@ -505,7 +506,7 @@
                 <repository>
                     <id>Release 2.10.0</id>
                     <name>Release 2.10.0</name>
-                    <url>https://repository.apache.org/content/repositories/orgapachebeam-1056/</url>
+                    <url>https://repository.apache.org/content/repositories/orgapachebeam-1057/</url>
                 </repository>
             </repositories>
         </profile>
