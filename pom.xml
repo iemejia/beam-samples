@@ -69,6 +69,7 @@
         <module>data-ingestion</module>
         <module>iot</module>
         <module>metrics-polling</module>
+        <module>microsoft-azure-cloud</module>
         <module>normalization</module>
         <module>orchestration</module>
         <module>serializableTests</module>
@@ -257,6 +258,22 @@
                 <artifactId>hadoop-common</artifactId>
                 <version>${hadoop.version}</version>
                 <!--clashes with org.eclipse.jetty shipped with spark-->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.mortbay.jetty</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-hdfs</artifactId>
+                <version>${hadoop.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.mortbay.jetty</groupId>
