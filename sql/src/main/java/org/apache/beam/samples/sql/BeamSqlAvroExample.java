@@ -27,6 +27,8 @@ import org.apache.beam.sdk.extensions.sql.example.model.Customer;
 import org.apache.beam.sdk.extensions.sql.example.model.Order;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.schemas.transforms.Filter;
+import org.apache.beam.sdk.schemas.transforms.Select;
 import org.apache.beam.sdk.schemas.utils.AvroUtils;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.MapElements;
@@ -84,6 +86,10 @@ class BeamSqlAvroExample {
     // Output the results of the query:
     customersFromWonderland.apply(logRecords(": is from Wonderland"));
 
+    PCollection<GenericRecord> filteredCustomers = customers.apply(Filter.<GenericRecord>create().whereFieldName("countryOfResidence", (String c) -> c.equals("Wonderland")));
+    filteredCustomers.apply(logRecords(": filteredCustomers"));
+//    PCollection<Row> customersFromWonderland2 = filteredCustomers.apply(Select.fieldNames("id", "name"));
+
     // Example 2. Query the results of the first query:
     PCollection<Row> totalInWonderland =
         customersFromWonderland.apply(SqlTransform.query("SELECT COUNT(id) FROM PCOLLECTION"));
@@ -108,12 +114,12 @@ class BeamSqlAvroExample {
     pipeline.run().waitUntilFinish();
   }
 
-  private static MapElements<Row, Row> logRecords(String suffix) {
+  private static <T> MapElements<T, T> logRecords(String suffix) {
     return MapElements.via(
-        new SimpleFunction<Row, Row>() {
+        new SimpleFunction<T, T>() {
           @Override
-          public Row apply(Row input) {
-            System.out.println(input.getValues() + suffix);
+          public T apply(T input) {
+            System.out.println(input.toString() + suffix);
             return input;
           }
         });
